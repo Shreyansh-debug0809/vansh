@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Help | BizGrowth Hub</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      color: #172033;
+      background: linear-gradient(145deg, #f8fafc 0%, #e8f2f5 100%);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 8%;
+      background: #ffffff;
+      border-bottom: 1px solid #dfe7ea;
+    }
+
+    .logo {
+      color: #2563eb;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .back-link {
+      color: #475569;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #087e83;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: #475569;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      color: #087e83;
+    }
+
+    main {
+      width: min(100% - 40px, 680px);
+      margin: 0 auto;
+      padding: 60px 0;
+    }
+
+    .form-panel {
+      padding: 36px;
+      border: 1px solid #d8e2e4;
+      border-top: 5px solid #087e83;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 14px 35px rgba(24, 53, 65, 0.08);
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: #087e83;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #102a36;
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+
+    .intro {
+      margin-bottom: 28px;
+      color: #566875;
+      line-height: 1.6;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .budget-section {
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid #dfe7ea;
+    }
+
+    .budget-section h2 {
+      margin-bottom: 7px;
+      color: #172033;
+      font-size: 1.2rem;
+    }
+
+    .budget-section > p {
+      margin-bottom: 18px;
+      color: #566875;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    label {
+      color: #263d47;
+      font-size: 0.92rem;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid #cbd7da;
+      border-radius: 5px;
+      background: #ffffff;
+      color: #172033;
+      font-size: 1rem;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #087e83;
+      outline: 3px solid rgba(8, 126, 131, 0.16);
+    }
+
+    .hint {
+      color: #647780;
+      font-size: 0.82rem;
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 24px;
+      border: 0;
+      border-radius: 5px;
+      background: #087e83;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: #06696d;
+    }
+
+    .notice,
+    .result {
+      margin-top: 16px;
+      color: #566875;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .result {
+      color: #075e62;
+      font-weight: 600;
+    }
+
+    @media (max-width: 560px) {
+      nav {
+        padding: 16px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        gap: 10px 16px;
+      }
+
+      main {
+        padding: 36px 0;
+      }
+
+      .form-panel {
+        padding: 24px 20px;
+      }
+
+      .fields {
+        grid-template-columns: 1fr;
+      }
+
+      .field.full-width {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">BizGrowth Hub</a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html#about">About Us</a>
+      <a class="nav-link" href="index.html#contact">Contact</a>
+      <a class="back-link" href="assistant.html">Back to options</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="form-panel" aria-labelledby="page-title">
+      <p class="eyebrow" id="form-eyebrow">Startup help</p>
+      <h1 id="page-title">Tell us about yourself</h1>
+      <p class="intro" id="form-intro">Share a few details to get started with business guidance.</p>
+
+      <form id="startup-form">
+        <div class="fields">
+          <div class="field">
+            <label for="first-name">Name</label>
+            <input id="first-name" name="firstName" type="text" autocomplete="given-name" required>
+          </div>
+
+          <div class="field">
+            <label for="surname">Surname</label>
+            <input id="surname" name="surname" type="text" autocomplete="family-name" required>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+          </div>
+
+          <div class="field">
+            <label for="email">Gmail address</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@gmail.com" pattern="[a-zA-Z0-9._%+-]+@gmail\.com" title="Enter a Gmail address ending in @gmail.com" required>
+          </div>
+
+          <div class="field full-width">
+            <label for="password">Create a password</label>
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+            <span class="hint">Use at least 8 characters. Your password is stored separately from your registration.</span>
+          </div>
+
+          <div class="field full-width">
+            <label for="business-type">What type of business are you planning?</label>
+            <input id="business-type" name="businessType" type="text" placeholder="For example, a clothing shop or food business" required>
+          </div>
+        </div>
+
+        <section class="budget-section" id="budget-section" aria-labelledby="budget-heading" hidden>
+          <h2 id="budget-heading">Budget details</h2>
+          <p>Tell us what amount you want help planning around.</p>
+          <div class="fields">
+            <div class="field">
+              <label for="budget-amount">Budget amount</label>
+              <input id="budget-amount" name="budgetAmount" type="number" min="0.01" step="any" placeholder="10000">
+            </div>
+
+            <div class="field">
+              <label for="currency">Currency code</label>
+              <input id="currency" name="currency" type="text" minlength="3" maxlength="3" pattern="[A-Za-z]{3}" placeholder="USD or INR" title="Enter a 3-letter currency code, such as USD or INR">
+              <span class="hint">Use a 3-letter code, such as USD or INR.</span>
+            </div>
+
+            <div class="field full-width">
+              <label for="budget-period">Budget period</label>
+              <select id="budget-period" name="budgetPeriod">
+                <option value="">Choose a period</option>
+                <option value="startup">Total startup budget</option>
+                <option value="monthly">Monthly operating budget</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <button id="submit-button" type="submit">Review my details</button>
+        <p class="notice">Your registration is saved to a local Excel sheet. Your password is stored as a salted hash in a separate account database; it is never put in Excel or sent to the chatbot.</p>
+        <p class="result" id="submit-status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector('#startup-form');
+    const submitButton = document.querySelector('#submit-button');
+    const submitStatus = document.querySelector('#submit-status');
+    const isBudgetMode = new URLSearchParams(window.location.search).get('mode') === 'budget';
+    const budgetSection = document.querySelector('#budget-section');
+
+    if (isBudgetMode) {
+      document.querySelector('#form-eyebrow').textContent = 'Budget planning';
+      document.querySelector('#page-title').textContent = 'Tell us about your business';
+      document.querySelector('#form-intro').textContent = 'Share a few details and the budget you want to plan around.';
+      budgetSection.hidden = false;
+    }
+
+    budgetSection.querySelectorAll('input, select').forEach((field) => {
+      field.disabled = !isBudgetMode;
+      field.required = isBudgetMode;
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+
+      const registration = {
+        firstName: form.elements.firstName.value.trim(),
+        surname: form.elements.surname.value.trim(),
+        phone: form.elements.phone.value.trim(),
+        email: form.elements.email.value.trim(),
+        password: form.elements.password.value,
+        businessType: form.elements.businessType.value.trim(),
+        assistantMode: isBudgetMode ? 'budget' : 'startup',
+        budgetDetails: null
+      };
+
+      if (isBudgetMode) {
+        registration.budgetDetails = {
+          amount: Number(form.elements.budgetAmount.value),
+          currency: form.elements.currency.value.trim().toUpperCase(),
+          period: form.elements.budgetPeriod.value
+        };
+      }
+
+      submitButton.disabled = true;
+      submitStatus.textContent = 'Saving your registration...';
+
+      try {
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(registration)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not save your registration.');
+
+        sessionStorage.setItem('assistantMode', registration.assistantMode);
+        sessionStorage.setItem('startupBusinessType', registration.businessType);
+        if (registration.budgetDetails) {
+          sessionStorage.setItem('startupBudget', JSON.stringify(registration.budgetDetails));
+        } else {
+          sessionStorage.removeItem('startupBudget');
+        }
+        window.location.href = 'brand-login.html';
+      } catch (error) {
+        submitStatus.textContent = error.message || 'Could not save your registration. Please try again.';
+        submitButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

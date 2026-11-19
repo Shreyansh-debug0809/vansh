@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizGrowth Hub - Business Helper</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      color: #1e293b;
+      background-color: #f8fafc;
+      line-height: 1.6;
+    }
+
+    /* Navigation Bar */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 8%;
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #475569;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .nav-links a:hover {
+      color: #2563eb;
+    }
+
+    /* First Display: Hero Section */
+    .hero-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 90vh;
+      padding: 60px 8%;
+      background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+      gap: 40px;
+    }
+
+    .hero-left {
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .hero-left h1 {
+      font-size: 2.8rem;
+      color: #0f172a;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .hero-left p {
+      font-size: 1.15rem;
+      color: #475569;
+      margin-bottom: 30px;
+    }
+
+    .scroll-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background-color: #0f172a;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .scroll-btn:hover {
+      background-color: #334155;
+    }
+
+    .hero-right {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hero-right img {
+      width: 100%;
+      max-width: 550px;
+      border-radius: 16px;
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+      object-fit: cover;
+    }
+
+    /* Second Scroll-Down Section */
+    .assistant-section {
+      min-height: 80vh;
+      padding: 80px 8%;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .site-footer {
+      padding: 52px 8% 20px;
+      border-top: 4px solid #087e83;
+      background: #102a36;
+      color: #ffffff;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-block {
+      scroll-margin-top: 90px;
+    }
+
+    .footer-block h2 {
+      margin-bottom: 12px;
+      color: #ffffff;
+      font-size: 1.3rem;
+    }
+
+    .footer-block p {
+      color: #d3e0e3;
+      line-height: 1.7;
+    }
+
+    .footer-link {
+      display: inline-block;
+      margin-top: 14px;
+      color: #8ce0d4;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .footer-link:hover,
+    .footer-link:focus-visible {
+      text-decoration: underline;
+    }
+
+    .copyright {
+      max-width: 1100px;
+      margin: 34px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      color: #d3e0e3;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    .schemes-section {
+      padding: 72px 8%;
+      border-top: 1px solid #dfe7ea;
+      background: #f3f8f6;
+    }
+
+    .schemes-heading {
+      max-width: 760px;
+      margin: 0 auto 32px;
+      text-align: center;
+    }
+
+    .schemes-heading h2 {
+      margin-bottom: 12px;
+      color: #102a36;
+      font-size: 2rem;
+    }
+
+    .schemes-heading p {
+      color: #566875;
+      line-height: 1.65;
+    }
+
+    .scheme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .scheme-card {
+      min-height: 270px;
+      padding: 24px;
+      border: 1px solid #d8e2e4;
+      border-top: 4px solid #087e83;
+      border-radius: 6px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .scheme-card.mudra {
+      border-top-color: #2563eb;
+    }
+
+    .scheme-card.pmegp {
+      border-top-color: #d97706;
+    }
+
+    .scheme-card h3 {
+      margin-bottom: 12px;
+      color: #172033;
+      font-size: 1.2rem;
+      line-height: 1.35;
+    }
+
+    .scheme-card p {
+      margin-bottom: 20px;
+      color: #566875;
+      line-height: 1.6;
+    }
+
+    .scheme-card a {
+      margin-top: auto;
+      color: #087e83;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .scheme-card a:hover,
+    .scheme-card a:focus-visible {
+      text-decoration: underline;
+    }
+
+    .schemes-disclaimer {
+      max-width: 1200px;
+      margin: 20px auto 0;
+      color: #566875;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .assistant-section h2 {
+      font-size: 2.2rem;
+      color: #0f172a;
+      margin-bottom: 15px;
+    }
+
+    .assistant-section p {
+      max-width: 600px;
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 35px;
+    }
+
+    .chatbot-btn {
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: #2563eb;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+      transition: transform 0.2s, background-color 0.3s;
+    }
+
+    .chatbot-btn:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-3px);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      nav {
+        padding: 16px 5%;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px 16px;
+      }
+
+      .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 40px;
+      }
+
+      .hero-left h1 {
+        font-size: 2.2rem;
+      }
+
+      .scheme-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .scheme-card:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      nav {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+        gap: 10px 18px;
+      }
+
+      .schemes-section {
+        padding: 52px 8%;
+      }
+
+      .site-footer {
+        padding: 40px 8% 18px;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .scheme-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .scheme-card:last-child {
+        grid-column: auto;
+      }
+
+      .scheme-card {
+        min-height: 230px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">BizGrowth Hub</div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#ai-helper">AI Assistant</a>
+      <a href="#about">About Us</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- First Display: Left Paragraph & Right Image -->
+  <section id="home" class="hero-section">
+    <div class="hero-left">
+      <h1>Smart Solutions to Grow Your Business Faster</h1>
+      <p>
+        We help startups and established companies streamline daily operations, improve customer engagement, and scale revenue with confidence. Whether you need strategic planning, marketing advice, or workflow automation, our tools and experts are here to guide your business every step of the way.
+      </p>
+      <a href="#ai-helper" class="scroll-btn">Explore Tools ↓</a>
+    </div>
+
+    <div class="hero-right">
+      <img src="https://unsplash.com" alt="Business team collaborating in a modern office">
+    </div>
+  </section>
+
+  <!-- Second scroll section: AI assistant -->
+  <section id="ai-helper" class="assistant-section">
+    <h2>Need Instant Business Advice?</h2>
+    <p>
+      Get quick answers on marketing strategies, financial planning, and customer support using our interactive assistant.
+    </p>
+    <a class="chatbot-btn" href="assistant.html">AI chat bot</a>
+  </section>
+
+  <section id="schemes" class="schemes-section" aria-labelledby="schemes-title">
+    <header class="schemes-heading">
+      <h2 id="schemes-title">Government Schemes for Businesses</h2>
+      <p>Explore official Indian government resources for startups and small businesses.</p>
+    </header>
+
+    <div class="scheme-grid">
+      <article class="scheme-card">
+        <h3>Startup India</h3>
+        <p>Browse central government schemes, startup resources, and recognition information for eligible startups.</p>
+        <a href="https://www.startupindia.gov.in/content/sih/en/government-schemes.html" target="_blank" rel="noopener noreferrer">Visit official portal</a>
+      </article>
+
+      <article class="scheme-card mudra">
+        <h3>Pradhan Mantri MUDRA Yojana</h3>
+        <p>Learn about credit for eligible micro-enterprises through participating banks, NBFCs, and microfinance institutions. MUDRA is not a direct lender.</p>
+        <a href="https://www.mudra.org.in/" target="_blank" rel="noopener noreferrer">Visit official portal</a>
+      </article>
+
+      <article class="scheme-card pmegp">
+        <h3>Prime Minister's Employment Generation Programme</h3>
+        <p>Explore the credit-linked programme supporting eligible entrepreneurs who set up new micro-enterprises.</p>
+        <a href="https://www.kviconline.gov.in/pmegpeportal/pmegphome/index.jsp" target="_blank" rel="noopener noreferrer">Visit official portal</a>
+      </article>
+    </div>
+
+    <p class="schemes-disclaimer">Scheme availability, eligibility, and application details can change. Confirm the latest information on each official portal.</p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <section id="about" class="footer-block" aria-labelledby="about-title">
+        <h2 id="about-title">About Us</h2>
+        <p>BizGrowth Hub helps small businesses turn early ideas into practical plans. Our startup and budget assistants offer focused guidance for launch decisions, spending priorities, and business growth.</p>
+      </section>
+
+      <section id="contact" class="footer-block" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact</h2>
+        <p>For business questions and guidance, contact us through the BizGrowth Hub assistant.</p>
+        <a class="footer-link" href="assistant.html">Talk to the assistant</a>
+      </section>
+    </div>
+
+    <p class="copyright">&copy; <span id="copyright-year">2026</span> BizGrowth Hub. All rights reserved.</p>
+  </footer>
+
+  <script>
+    document.querySelector('#copyright-year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>

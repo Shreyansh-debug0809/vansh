@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup Chat | BizGrowth Hub</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      color: #172033;
+      background: linear-gradient(145deg, #f8fafc 0%, #e8f2f5 100%);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 8%;
+      background: #ffffff;
+      border-bottom: 1px solid #dfe7ea;
+    }
+
+    .logo {
+      color: #2563eb;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .back-link {
+      color: #475569;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #087e83;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: #475569;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      color: #087e83;
+    }
+
+    main {
+      width: min(100% - 32px, 760px);
+      margin: 0 auto;
+      padding: 38px 0;
+    }
+
+    .chat-panel {
+      overflow: hidden;
+      border: 1px solid #d8e2e4;
+      border-top: 5px solid #087e83;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 14px 35px rgba(24, 53, 65, 0.08);
+    }
+
+    .chat-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid #e4ebed;
+    }
+
+    .eyebrow {
+      margin-bottom: 8px;
+      color: #087e83;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin-bottom: 7px;
+      color: #102a36;
+      font-size: 1.7rem;
+    }
+
+    .chat-header p:last-child {
+      color: #566875;
+      line-height: 1.5;
+    }
+
+    .business-context {
+      display: none;
+      margin-top: 12px;
+      color: #344955;
+      font-size: 0.9rem;
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 340px;
+      max-height: 52vh;
+      overflow-y: auto;
+      padding: 24px 28px;
+      background: #f7faf9;
+    }
+
+    .message {
+      max-width: min(88%, 560px);
+      padding: 13px 15px;
+      border-radius: 8px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      border: 1px solid #dce8e7;
+      background: #ffffff;
+      color: #263d47;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #087e83;
+      color: #ffffff;
+    }
+
+    .chat-controls {
+      padding: 18px 24px 22px;
+      border-top: 1px solid #e4ebed;
+    }
+
+    .chat-form {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      min-width: 0;
+      min-height: 48px;
+      max-height: 140px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid #cbd7da;
+      border-radius: 5px;
+      color: #172033;
+      font: inherit;
+    }
+
+    textarea:focus {
+      border-color: #087e83;
+      outline: 3px solid rgba(8, 126, 131, 0.16);
+    }
+
+    button {
+      min-width: 92px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 5px;
+      background: #087e83;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    button:hover:not(:disabled) {
+      background: #06696d;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .status {
+      min-height: 1.4em;
+      margin-top: 10px;
+      color: #647780;
+      font-size: 0.85rem;
+    }
+
+    .privacy-note {
+      margin-top: 8px;
+      color: #647780;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 560px) {
+      nav {
+        padding: 16px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        gap: 10px 16px;
+      }
+
+      main {
+        padding: 20px 0;
+      }
+
+      .chat-header,
+      .messages {
+        padding: 20px;
+      }
+
+      .messages {
+        min-height: 300px;
+        max-height: 55vh;
+      }
+
+      .chat-controls {
+        padding: 16px;
+      }
+
+      .chat-form {
+        flex-direction: column;
+      }
+
+      button {
+        min-height: 46px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">BizGrowth Hub</a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html#about">About Us</a>
+      <a class="nav-link" href="index.html#contact">Contact</a>
+      <a class="back-link" href="assistant.html">Back to options</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="chat-panel" aria-labelledby="page-title">
+      <header class="chat-header">
+        <p class="eyebrow" id="chat-eyebrow">Startup help</p>
+        <h1 id="page-title">Ask your business question</h1>
+        <p id="chat-intro">Get practical guidance as you plan your next steps.</p>
+        <p class="business-context" id="business-context"></p>
+      </header>
+
+      <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+      <div class="chat-controls">
+        <form class="chat-form" id="chat-form">
+          <label for="question" hidden>Your question</label>
+          <textarea id="question" name="question" placeholder="Ask about launching, customers, or your next steps..." rows="2" required></textarea>
+          <button id="send-button" type="submit">Send</button>
+        </form>
+        <p class="status" id="status" aria-live="polite"></p>
+        <p class="privacy-note">Your chat is sent to OpenAI to generate replies. Avoid sharing passwords or sensitive personal information.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector('#chat-form');
+    const questionField = document.querySelector('#question');
+    const messagesElement = document.querySelector('#messages');
+    const statusElement = document.querySelector('#status');
+    const sendButton = document.querySelector('#send-button');
+    const assistantMode = sessionStorage.getItem('assistantMode') || 'startup';
+    const businessType = sessionStorage.getItem('startupBusinessType') || '';
+    const businessContext = document.querySelector('#business-context');
+    const chatHistory = [];
+    let budgetDetails = null;
+
+    try {
+      budgetDetails = JSON.parse(sessionStorage.getItem('startupBudget') || 'null');
+    } catch {
+      budgetDetails = null;
+    }
+
+    if (assistantMode === 'budget') {
+      document.querySelector('#chat-eyebrow').textContent = 'Budget planning';
+      document.querySelector('#page-title').textContent = 'Plan your business budget';
+      document.querySelector('#chat-intro').textContent = 'Work through startup costs, monthly spending, and cash flow with your assistant.';
+      const periodLabel = budgetDetails?.period === 'monthly' ? 'monthly operating budget' : 'total startup budget';
+      const budgetLabel = budgetDetails
+        ? `Starting budget: ${budgetDetails.currency} ${budgetDetails.amount} (${periodLabel})`
+        : '';
+      businessContext.textContent = [businessType && `Business type: ${businessType}`, budgetLabel]
+        .filter(Boolean)
+        .join(' · ');
+      if (businessContext.textContent) businessContext.style.display = 'block';
+    } else if (businessType) {
+      businessContext.textContent = `Business type: ${businessType}`;
+      businessContext.style.display = 'block';
+    }
+
+    function addMessage(role, content) {
+      const message = document.createElement('p');
+      message.className = `message ${role}`;
+      message.textContent = content;
+      messagesElement.append(message);
+      messagesElement.scrollTop = messagesElement.scrollHeight;
+    }
+
+    addMessage('assistant', assistantMode === 'budget'
+      ? 'Hi! I can help you organize costs, prioritize spending, and plan cash flow. Which part of your budget should we work through first?'
+      : businessType
+        ? `Hi! I can help you think through starting a ${businessType} business. What would you like to work on first?`
+        : 'Hi! I can help you shape your idea, find your first customers, or plan your launch. What would you like to work on first?');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const question = questionField.value.trim();
+      if (!question) return;
+
+      questionField.value = '';
+      addMessage('user', question);
+      chatHistory.push({ role: 'user', content: question });
+      statusElement.textContent = 'Getting a response...';
+      sendButton.disabled = true;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assistantMode, businessType, budgetDetails, messages: chatHistory })
+        });
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'The chat service could not respond.');
+
+        chatHistory.push({ role: 'assistant', content: data.reply });
+        addMessage('assistant', data.reply);
+        statusElement.textContent = '';
+      } catch (error) {
+        statusElement.textContent = error.message || 'Could not connect to the chat service. Please try again.';
+      } finally {
+        sendButton.disabled = false;
+        questionField.focus();
+      }
+    });
+  </script>
+</body>
+</html>
