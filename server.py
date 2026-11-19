@@ -19,7 +19,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = int(os.environ.get("PORT", "3000"))
 AUTH_SESSION_TTL = 8 * 60 * 60
 PASSWORD_HASH_ITERATIONS = 600_000
