@@ -267,15 +267,16 @@ def create_account(payload):
     connection = open_account_database()
     try:
         connection.execute("BEGIN IMMEDIATE")
-        connection.execute(
-INSERT INTO accounts (email, password_salt, password_hash, created_at) VALUES (?, ?, ?, ?)",
-(
-payload["email"].strip().lower(),
-salt,
-password_hash,
-datetime.now(timezone.utc).isoformat(timespec="seconds"),
-),
-)
+             connection.execute(
+         "INSERT INTO accounts (email, password_salt, password_hash, created_at) VALUES (?, ?, ?, ?)",
+         (
+             payload["email"].strip().lower(),
+             salt,
+             password_hash,
+             datetime.now(timezone.utc).isoformat(timespec="seconds"),
+         ),
+     )
+
 append_registration(payload)
 connection.commit()
 except Exception:
