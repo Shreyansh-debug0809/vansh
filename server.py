@@ -11,9 +11,8 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import quote, urlsplit
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
-
 
 from openpyxl import Workbook, load_workbook
 
@@ -58,12 +57,6 @@ def ask_gemini(messages, mode, biz_type, budget):
         "generationConfig": {"maxOutputTokens": 700, "temperature": 0.7},
     }
 
-            body = {
-        "systemInstruction": {"parts": [{"text": prompt}]},
-        "contents": contents,
-        "generationConfig": {"maxOutputTokens": 700, "temperature": 0.7},
-    }
-
     host = "generativelanguage." + "googleapis.com"
     url = f"https://{host}/v1beta/models/gemini-2.5-flash:generateContent"
     headers = {
@@ -71,7 +64,6 @@ def ask_gemini(messages, mode, biz_type, budget):
         "x-goog-api-key": api_key,
     }
     req = Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
-
 
     try:
         with urlopen(req, timeout=45) as resp:
@@ -88,7 +80,6 @@ def ask_gemini(messages, mode, biz_type, budget):
     except Exception as err:
         print("Gemini Error:", repr(err))
         return f"Error: {err}"
-
 
 
 def get_db():
@@ -138,8 +129,8 @@ def check_user(email, password):
         conn.close()
     if not row:
         return False
-    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), row[0], 200_000)
-    return hmac.compare_digest(test_hash, row[1])
+    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), row, 200_000)
+    return hmac.compare_digest(test_hash, row)
 
 
 class Handler(BaseHTTPRequestHandler):
