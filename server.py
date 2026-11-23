@@ -59,14 +59,20 @@ def ask_gemini(messages, mode, biz_type, budget):
     url = f"https://googleapis.com{quote(api_key)}"
     req = Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
 
-    try:
+        try:
         with urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read())
-        parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+        candidates = data.get("candidates") or [{}]
+        parts = candidates[0].get("content", {}).get("parts", [])
         reply = "\n".join(p.get("text", "") for p in parts).strip()
         return reply or "No reply generated. Please try again."
+    except HTTPError as err:
+        detail = err.read().decode("utf-8", errors="ignore")
+        print("Gemini HTTP Error:", err.code, detail)
+        return f"Gemini Error {err.code}: Check your GEMINI_API_KEY in Render."
     except Exception as err:
         print("Gemini Error:", repr(err))
+        return f"Error: {err}"
         return "AI service is temporarily busy. Please try again in a moment."
 
 
