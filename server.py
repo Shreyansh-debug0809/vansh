@@ -58,28 +58,35 @@ def ask_gemini(messages, mode, biz_type, budget):
     }
 
     host = "generativelanguage." + "googleapis.com"
-    url = f"https://{host}/v1beta/models/gemini-3.5-flash-lite:generateContent"
     headers = {
         "Content-Type": "application/json",
         "x-goog-api-key": api_key,
     }
-    req = Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
 
-    try:
-        with urlopen(req, timeout=45) as resp:
-            data = json.loads(resp.read())
-        candidates = data.get("candidates") or []
-        first_candidate = candidates.pop(0) if candidates else {}
-        parts = first_candidate.get("content", {}).get("parts", [])
-        reply = "\n".join(p.get("text", "") for p in parts).strip()
-        return reply or "No reply generated. Please try again."
-    except HTTPError as err:
-        detail = err.read().decode("utf-8", errors="ignore")
-        print("Gemini HTTP Error:", err.code, detail)
-        return f"Gemini Error {err.code}: Check your GEMINI_API_KEY in Render."
-    except Exception as err:
-        print("Gemini Error:", repr(err))
-        return f"Error: {err}"
+    for model_name in ("gemini-3.5-flash-lite", "gemini-3-flash-preview"):
+        url = f"https://{host}/v1beta/models/{model_name}:generateContent"
+        req = Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+        try:
+            with urlopen(req, timeout=45) as resp:
+                data = json.loads(resp.read())
+            candidates = data.get("candidates") or []
+            first_candidate = candidates.pop(0) if candidates else {}
+            parts = first_candidate.get("content", {}).get("parts", [])
+            reply = "\n".join(p.get("text", "") for p in parts).strip()
+            if reply:
+                return reply
+        except HTTPError as err:
+            detail = err.read().decode("utf-8", errors="ignore")
+            print(f"Gemini {model_name} HTTP {err.code}:", detail)
+            if err.code in {429, 500, 503}:
+                continue
+            return f"Gemini Error {err.code}: {detail[:180]}"
+        except Exception as err:
+            print("Gemini Error:", repr(err))
+            return f"Error: {err}"
+
+    return "The AI server is momentarily busy. Please click Send again in a few seconds."
+
 
 
 def get_db():
