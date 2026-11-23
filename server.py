@@ -207,9 +207,7 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/chat":
-            if not self.logged_in():
-                self.send_json(401, {"error": "Please sign in first."})
-                return
+                    if path == "/api/chat":
             reply = ask_gemini(
                 payload.get("messages", []),
                 payload.get("assistantMode", "startup"),
@@ -218,6 +216,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             self.send_json(200, {"reply": reply})
             return
+
 
         self.send_error(404, "Not Found")
 
