@@ -58,7 +58,7 @@ def ask_gemini(messages, mode, biz_type, budget):
     }
 
     host = "generativelanguage." + "googleapis.com"
-    url = f"https://{host}/v1beta/models/gemini-2.5-flash:generateContent"
+    url = f"https://{host}/v1beta/models/gemini-3.5-flash-lite:generateContent"
     headers = {
         "Content-Type": "application/json",
         "x-goog-api-key": api_key,
