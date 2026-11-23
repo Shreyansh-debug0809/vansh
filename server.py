@@ -129,8 +129,8 @@ def check_user(email, password):
         conn.close()
     if not row:
         return False
-    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), row, 200_000)
-    return hmac.compare_digest(test_hash, row)
+    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), row[0], 200_000)
+    return hmac.compare_digest(test_hash, row[1])
 
 
 class Handler(BaseHTTPRequestHandler):
