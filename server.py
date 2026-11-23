@@ -68,7 +68,7 @@ def ask_gemini(messages, mode, biz_type, budget):
     try:
         with urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read())
-        candidates = data.get("candidates") or [{}]
+        candidates = data.get("candidates") or []
         first_candidate = candidates.pop(0) if candidates else {}
         parts = first_candidate.get("content", {}).get("parts", [])
         reply = "\n".join(p.get("text", "") for p in parts).strip()
@@ -129,8 +129,9 @@ def check_user(email, password):
         conn.close()
     if not row:
         return False
-    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), row[0], 200_000)
-    return hmac.compare_digest(test_hash, row[1])
+    salt, stored_hash = row
+    test_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 200_000)
+    return hmac.compare_digest(test_hash, stored_hash)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -207,7 +208,6 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/chat":
-                    if path == "/api/chat":
             reply = ask_gemini(
                 payload.get("messages", []),
                 payload.get("assistantMode", "startup"),
@@ -216,7 +216,6 @@ class Handler(BaseHTTPRequestHandler):
             )
             self.send_json(200, {"reply": reply})
             return
-
 
         self.send_error(404, "Not Found")
 
