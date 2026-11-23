@@ -12,7 +12,7 @@ from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 
 from openpyxl import Workbook, load_workbook
@@ -51,6 +51,82 @@ REGISTRATION_HEADERS = (
     "Currency",
     "Budget Period",
 )
+
+
+def ask_gemini_ai(messages, system_instruction, api_key):
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+    url = (
+        f"https://googleapis.com"
+        f"{quote(model)}:generateContent?key={quote(api_key)}"
+    )
+
+    contents = []
+    for msg in messages:
+        role = "model" if msg.get("role") == "assistant" else "user"
+        text = msg.get("content", "").strip()
+        if text:
+            contents.append({"role": role, "parts": [{"text": text}]})
+
+    payload = {
+        "systemInstruction": {"parts": [{"text": system_instruction}]},
+        "contents": contents,
+        "generationConfig": {
+            "maxOutputTokens": 700,
+            "temperature": 0.7,
+        },
+    }
+
+    request = Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    with urlopen(request, timeout=45) as response:
+        result = json.loads(response.read())
+
+    candidates = result.get("candidates", [])
+    if not candidates:
+        return ""
+    parts = candidates[0].get("content", {}).get("parts", [])
+    return "\n".join(part.get("text", "") for part in parts if isinstance(part.get("text"), str)).strip()
+
+
+def generate_basic_reply(messages, assistant_mode, business_type, budget_details):
+    last_message = ""
+    for msg in reversed(messages):
+        if msg.get("role") == "user":
+            last_message = msg.get("content", "").strip()
+            break
+
+    text = last_message.lower()
+    biz_label = f" for your {business_type} business" if business_type else ""
+
+    if assistant_mode == "budget" and isinstance(budget_details, dict):
+        amount = budget_details.get("amount", 0)
+        currency = budget_details.get("currency", "INR").upper()
+        period = "monthly operating" if budget_details.get("period") == "monthly" else "total startup"
+        ops = round(amount * 0.40, 2)
+        mkt = round(amount * 0.25, 2)
+        tools = round(amount * 0.20, 2)
+        reserve = round(amount - (ops + mkt + tools), 2)
+        return (
+            f"Here is a practical {period} budget plan{biz_label} ({currency} {amount:,.2f}):\n\n"
+            f"• Core Operations & Inventory (40%): {currency} {ops:,.2f}\n"
+            f"• Marketing & Customer Acquisition (25%): {currency} {mkt:,.2f}\n"
+            f"• Software, Website & Tools (20%): {currency} {tools:,.2f}\n"
+            f"• Emergency Reserve (15%): {currency} {reserve:,.2f}\n\n"
+            f"Tip: Keep fixed monthly costs separate from one-time setup expenses."
+        )
+
+    return (
+        f"Here is a clear 4-step action plan{biz_label}:\n\n"
+        f"1. Validate Demand: Talk to 10 potential customers and confirm they will pay for your solution.\n"
+        f"2. Launch a Simple Offer: Start with one core product or service instead of building everything at once.\n"
+        f"3. Set Up Online Presence: Create a clean landing page, WhatsApp Business profile, and Google Business listing.\n"
+        f"4. Track Cash Flow Weekly: Record every expense and sale from day one."
+    )
 
 
 def valid_chat_request(payload):
@@ -195,282 +271,3 @@ def create_account(payload):
         salt,
         PASSWORD_HASH_ITERATIONS,
     )
-    connection = open_account_database()
-    try:
-        connection.execute("BEGIN IMMEDIATE")
-        connection.execute(
-            "INSERT INTO accounts (email, password_salt, password_hash, created_at) VALUES (?, ?, ?, ?)",
-            (
-                payload["email"].strip().lower(),
-                salt,
-                password_hash,
-                datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            ),
-        )
-        append_registration(payload)
-        connection.commit()
-    except Exception:
-        connection.rollback()
-        raise
-    finally:
-        connection.close()
-
-
-def verify_account(email, password):
-    connection = open_account_database()
-    try:
-        account = connection.execute(
-            "SELECT password_salt, password_hash FROM accounts WHERE email = ?",
-            (email,),
-        ).fetchone()
-    finally:
-        connection.close()
-
-    salt = account[0] if account else bytes(16)
-    expected_hash = account[1] if account else bytes(32)
-    actual_hash = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt,
-        PASSWORD_HASH_ITERATIONS,
-    )
-    return account is not None and hmac.compare_digest(actual_hash, expected_hash)
-
-
-def login_attempt_key(client_ip, email):
-    now = time.time()
-    key = (client_ip, email)
-    attempts = LOGIN_ATTEMPTS.get(key)
-    if attempts is None or now - attempts[0] >= LOGIN_WINDOW_SECONDS:
-        LOGIN_ATTEMPTS[key] = (now, 0)
-    return key
-
-
-def record_login_failure(key):
-    now = time.time()
-    started_at, count = LOGIN_ATTEMPTS.get(key, (now, 0))
-    if now - started_at >= LOGIN_WINDOW_SECONDS:
-        started_at, count = now, 0
-    LOGIN_ATTEMPTS[key] = (started_at, count + 1)
-
-
-def create_session(response):
-    session_id = secrets.token_urlsafe(32)
-    AUTH_SESSIONS[session_id] = time.time() + AUTH_SESSION_TTL
-    cookie = f"bizgrowth_auth={session_id}; HttpOnly; SameSite=Lax; Path=/; Max-Age={AUTH_SESSION_TTL}"
-    if os.environ.get("COOKIE_SECURE", "").lower() in {"1", "true", "yes"}:
-        cookie += "; Secure"
-    response.send_json(200, {"signedIn": True}, (("Set-Cookie", cookie),))
-
-
-class RequestHandler(BaseHTTPRequestHandler):
-    def send_json(self, status, payload, extra_headers=()):
-        body = json.dumps(payload).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("X-Content-Type-Options", "nosniff")
-        for name, value in extra_headers:
-            self.send_header(name, value)
-        self.end_headers()
-        self.wfile.write(body)
-
-    def is_authenticated(self):
-        cookie = SimpleCookie()
-        try:
-            cookie.load(self.headers.get("Cookie", ""))
-        except CookieError:
-            return False
-
-        session_cookie = cookie.get("bizgrowth_auth")
-        if session_cookie is None:
-            return False
-
-        session_id = session_cookie.value
-        expires_at = AUTH_SESSIONS.get(session_id, 0)
-        if expires_at <= time.time():
-            AUTH_SESSIONS.pop(session_id, None)
-            return False
-        return True
-
-    def do_GET(self):
-        route = urlsplit(self.path).path
-        if route == "/startup-chat.html" and not self.is_authenticated():
-            self.send_response(303)
-            self.send_header("Location", "/brand-login.html")
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            return
-
-        page = PAGES.get(route)
-        if page is None:
-            self.send_error(404, "Not found")
-            return
-
-        try:
-            content = (ROOT / page).read_bytes()
-        except OSError:
-            self.send_error(500, "Could not load page")
-            return
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(content)))
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.end_headers()
-        self.wfile.write(content)
-
-    def do_POST(self):
-        route = urlsplit(self.path).path
-        if route not in {"/api/chat", "/api/register", "/api/auth/login"}:
-            self.send_error(404, "Not found")
-            return
-
-        try:
-            content_length = int(self.headers.get("Content-Length", "0"))
-        except ValueError:
-            self.send_json(400, {"error": "Invalid request length."})
-            return
-
-        if not 0 < content_length <= MAX_BODY_SIZE:
-            self.send_json(413, {"error": "Request body is missing or too large."})
-            return
-
-        try:
-            payload = json.loads(self.rfile.read(content_length))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            self.send_json(400, {"error": "Request body must be valid JSON."})
-            return
-
-        if not isinstance(payload, dict):
-            self.send_json(400, {"error": "Request body must be a JSON object."})
-            return
-
-        if route == "/api/auth/login":
-            email = payload.get("email")
-            password = payload.get("password")
-            if not isinstance(email, str) or not isinstance(password, str) or not 1 <= len(password) <= 128:
-                self.send_json(400, {"error": "Enter your Gmail address and password."})
-                return
-            email = email.strip().lower()
-            attempt_key = login_attempt_key(self.client_address[0], email)
-            if LOGIN_ATTEMPTS.get(attempt_key, (0, 0))[1] >= MAX_LOGIN_ATTEMPTS:
-                self.send_json(
-                    429,
-                    {"error": "Too many sign-in attempts. Try again in 15 minutes."},
-                    (("Retry-After", str(LOGIN_WINDOW_SECONDS)),),
-                )
-                return
-            if not re.fullmatch(r"[A-Za-z0-9._%+-]+@gmail\.com", email, re.IGNORECASE):
-                record_login_failure(attempt_key)
-                self.send_json(401, {"error": "The Gmail address or password is incorrect."})
-                return
-            try:
-                valid_account = verify_account(email, password)
-            except sqlite3.Error:
-                self.send_json(500, {"error": "Could not access the account database. Please try again."})
-                return
-            if not valid_account:
-                record_login_failure(attempt_key)
-                self.send_json(401, {"error": "The Gmail address or password is incorrect."})
-                return
-            LOGIN_ATTEMPTS.pop(attempt_key, None)
-            create_session(self)
-            return
-
-        if route == "/api/register":
-            if not valid_registration_request(payload):
-                self.send_json(400, {"error": "Please check the registration details and try again."})
-                return
-            try:
-                create_account(payload)
-            except sqlite3.IntegrityError:
-                self.send_json(409, {"error": "An account with this Gmail already exists. Sign in with your password."})
-                return
-            except (OSError, sqlite3.Error, ValueError):
-                self.send_json(500, {"error": "Could not save the registration workbook. Close it in Excel and try again."})
-                return
-            self.send_json(201, {"saved": True})
-            return
-
-        if not self.is_authenticated():
-            self.send_json(401, {"error": "Sign in to your BizGrowth Hub account before using the assistant."})
-            return
-
-        if not valid_chat_request(payload):
-            self.send_json(400, {"error": "The chat request is invalid or too long."})
-            return
-
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            self.send_json(
-                503,
-                {"error": "Chat is not configured yet. Set OPENAI_API_KEY on the server and restart it."},
-            )
-            return
-
-        business_type = payload["businessType"].strip()
-        assistant_mode = payload["assistantMode"]
-        budget_details = payload.get("budgetDetails")
-        business_context = f" The user's business type is: {business_type}." if business_type else ""
-        if assistant_mode == "budget":
-            business_context += (
-                f" The user wants budget planning. Their budget is {budget_details['currency'].upper()} "
-                f"{budget_details['amount']} for their {'monthly operating budget' if budget_details['period'] == 'monthly' else 'total startup budget'}."
-            )
-        api_payload = {
-            "model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
-            "instructions": (
-                "You are a practical small-business advisor. Give clear, actionable guidance. "
-                "When the user asks for budget planning, separate one-time and recurring costs, state assumptions, and show arithmetic clearly. "
-                "Ask a focused follow-up question when important information is missing. "
-                "Do not promise specific financial or legal outcomes."
-                f"{business_context}"
-            ),
-            "input": payload["messages"],
-            "max_output_tokens": 700,
-            "store": False,
-        }
-        request = Request(
-            "https://api.openai.com/v1/responses",
-            data=json.dumps(api_payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
-        )
-
-        try:
-            with urlopen(request, timeout=45) as api_response:
-                result = json.loads(api_response.read())
-        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError):
-            self.send_json(
-                502,
-                {"error": "OpenAI could not complete the request. Check the server configuration and try again."},
-            )
-            return
-
-        reply = "\n".join(
-            item["text"]
-            for output in result.get("output", [])
-            for item in output.get("content", [])
-            if item.get("type") == "output_text" and isinstance(item.get("text"), str)
-        ).strip()
-        if not reply:
-            self.send_json(502, {"error": "The chat service returned an empty reply. Please try again."})
-            return
-
-        self.send_json(200, {"reply": reply})
-
-
-if __name__ == "__main__":
-    server = HTTPServer((HOST, PORT), RequestHandler)
-    print(f"BizGrowth Hub is running at http://{HOST}:{PORT}")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        server.server_close()
