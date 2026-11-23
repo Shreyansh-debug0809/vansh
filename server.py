@@ -10,8 +10,10 @@ from datetime import datetime, timezone
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
+
 
 from openpyxl import Workbook, load_workbook
 
@@ -59,11 +61,12 @@ def ask_gemini(messages, mode, biz_type, budget):
     url = f"https://googleapis.com{quote(api_key)}"
     req = Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
 
-        try:
+    try:
         with urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read())
         candidates = data.get("candidates") or [{}]
-        parts = candidates[0].get("content", {}).get("parts", [])
+        first_candidate = candidates.pop(0) if candidates else {}
+        parts = first_candidate.get("content", {}).get("parts", [])
         reply = "\n".join(p.get("text", "") for p in parts).strip()
         return reply or "No reply generated. Please try again."
     except HTTPError as err:
@@ -73,7 +76,7 @@ def ask_gemini(messages, mode, biz_type, budget):
     except Exception as err:
         print("Gemini Error:", repr(err))
         return f"Error: {err}"
-        return "AI service is temporarily busy. Please try again in a moment."
+
 
 
 def get_db():
