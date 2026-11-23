@@ -58,13 +58,20 @@ def ask_gemini(messages, mode, biz_type, budget):
         "generationConfig": {"maxOutputTokens": 700, "temperature": 0.7},
     }
 
-        host = "generativelanguage." + "googleapis.com"
+            body = {
+        "systemInstruction": {"parts": [{"text": prompt}]},
+        "contents": contents,
+        "generationConfig": {"maxOutputTokens": 700, "temperature": 0.7},
+    }
+
+    host = "generativelanguage." + "googleapis.com"
     url = f"https://{host}/v1beta/models/gemini-2.5-flash:generateContent"
     headers = {
         "Content-Type": "application/json",
         "x-goog-api-key": api_key,
     }
     req = Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+
 
     try:
         with urlopen(req, timeout=45) as resp:
